@@ -9,10 +9,12 @@ import os
 import numpy as np
 import re
 
-def import_CORDEX(config,inFiles,inpID):
+def import_CORDEX(inFiles,varID,internalVarName, cutoutArgs, **kwargs):
     # Import --------------------------------------
     #Import using the default import functionality
-    da=KAPy.defaultImport(config, inFiles, inpID)
+    da=KAPy.defaultImport(inFiles=inFiles,
+                            varID=varID,
+                            internalVarName=internalVarName)
 
     #Post import modifications ------------
     inFnames=[os.path.basename(f) for f in inFiles]
@@ -35,18 +37,9 @@ def import_CORDEX(config,inFiles,inpID):
             da = da.assign_coords(lon=useThis)
 
     #Apply cutouts-----------------
-    if config["cutouts"]["method"] == "lonlatbox":
-        da=KAPy.cutout_lonlat(da,
-                config["cutouts"]["xmin"],
-                config["cutouts"]["xmax"],
-                config["cutouts"]["ymin"],
-                config["cutouts"]["ymax"],
-                config["inputs"][inpID]["varID"])
+    if cutoutArgs["method"] == "lonlatbox":
+        da=KAPy.cutout_lonlat(da,**cutoutArgs,varID=varID)
 
     return(da)
 
-    d={}
-    for f in inFiles:
-        print(f)
-        da=KAPy.defaultImport(config, f, inpID) 
-        d[f]=da.lon.compute().values.max()
+    

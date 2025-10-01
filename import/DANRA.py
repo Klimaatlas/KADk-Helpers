@@ -3,7 +3,7 @@
 # variable.
 import KAPy
 
-def import_DANRA(config,inFiles,inpID):
+def import_DANRA(inFiles,varID,internalVarName, **kwargs):
     """
     Import DANRA
 
@@ -19,19 +19,21 @@ def import_DANRA(config,inFiles,inpID):
         ID of the input configuration to use
     """
     #Import using the default import functionality
-    da=KAPy.defaultImport(config, inFiles, inpID)
+    da=KAPy.defaultImport(inFiles=inFiles,
+                            varID=varID,
+                            internalVarName=internalVarName)
 
     #Calculate daily binned values
-    if config["inputs"][inpID]["varID"]=="tas":
+    if varID=="tas":
         da=da.resample(time='D').mean()
-    elif config["inputs"][inpID]["varID"]=="tasmax":
+    elif varID=="tasmax":
         da=da.resample(time='D').max()
-    elif config["inputs"][inpID]["varID"]=="tasmin":
+    elif varID=="tasmin":
         da=da.resample(time='D').min()
-    elif config["inputs"][inpID]["varID"]=="pr":
+    elif varID=="pr":
         da=da.resample(time='D').sum()
         da.attrs['units']='mm/day'
     else:
-        raise ValueError(f"Unknown variable ID '{config["inputs"][inpID]["varID"]}' in DANRA import.")
+        raise ValueError(f"Unknown variable ID '{varID}' in DANRA import.")
 
     return(da)

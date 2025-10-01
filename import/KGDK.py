@@ -5,7 +5,7 @@ import xarray as xr
 from cdo import Cdo
 import xesmf as xe
 
-def import_KGDK(config, inFiles, inpID):
+def import_KGDK(inFiles,varID,internalVarName, **kwargs):
     """
     Import KGDK data
 
@@ -36,9 +36,6 @@ def import_KGDK(config, inFiles, inpID):
     inFiles=["./inputs/tas_klimagrid_2023.nc"]
     inpID="KGDK"
     """
-    # Get input configuration
-    thisInp = config["inputs"][inpID]
-
     #Read input files into RAM
     time_coder=xr.coders.CFDatetimeCoder(use_cftime=True)
     dsIn =xr.open_mfdataset(inFiles,
@@ -49,7 +46,7 @@ def import_KGDK(config, inFiles, inpID):
     dsIn=dsIn.compute()
 
     #Regrid 20km tas data onto 10km tasmax grid to allow calculation of e.g. skewness
-    if config["inputs"][inpID]["varID"]=="tas":
+    if varID=="tas":
         refGrd=helpers.readFile("/dmidata/projects/klimaatlas/v2025a/inputs/KGDK/tasmaxobs_2004-2019.nc")
         regrdr=xe.Regridder(dsIn,refGrd,
                             method="nearest_s2d",
@@ -57,7 +54,7 @@ def import_KGDK(config, inFiles, inpID):
         dsIn=regrdr(dsIn,keep_attrs=True)
 
     # Select the desired variable and rename it
-    ds = dsIn.rename({thisInp["internalVarName"]: thisInp["varID"]})
+    ds = dsIn.rename({internalVarName: varID})
 
     #Specify the coordinate system to be UTM. First add the crs information
     #Thanks to ChatGPT for help setting this up, particularly the coordinate definition
@@ -85,12 +82,12 @@ def import_KGDK(config, inFiles, inpID):
     ds.lon.attrs['units']="degrees_east"
     ds.lat.attrs['standard_name']="latitude"
     ds.lat.attrs['units']="degrees_north"
-    ds[thisInp["varID"]].attrs['coordinates'] = "lon lat"
+    ds[varID].attrs['coordinates'] = "lon lat"
 
     #Ensure consistent ordering
     ds=ds.transpose("time","y","x")
     
     ## Convert to dataarray
-    da = ds[thisInp["varID"]]  
+    da = ds[varID]  
 
     return(da)
