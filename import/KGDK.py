@@ -5,7 +5,7 @@ import xarray as xr
 from cdo import Cdo
 import xesmf as xe
 
-def import_KGDK(inFiles,varID,internalVarName, **kwargs):
+def import_KGDK(inFiles,varCode,internalVarName, **kwargs):
     """
     Import KGDK data
 
@@ -46,7 +46,7 @@ def import_KGDK(inFiles,varID,internalVarName, **kwargs):
     dsIn=dsIn.compute()
 
     #Regrid 20km tas data onto 10km tasmax grid to allow calculation of e.g. skewness
-    if varID=="tas":
+    if varCode=="tas":
         refGrd=helpers.readFile("/dmidata/projects/klimaatlas/v2025a/inputs/KGDK/tasmaxobs_2004-2019.nc")
         regrdr=xe.Regridder(dsIn,refGrd,
                             method="nearest_s2d",
@@ -54,7 +54,7 @@ def import_KGDK(inFiles,varID,internalVarName, **kwargs):
         dsIn=regrdr(dsIn,keep_attrs=True)
 
     # Select the desired variable and rename it
-    ds = dsIn.rename({internalVarName: varID})
+    ds = dsIn.rename({internalVarName: varCode})
 
     #Specify the coordinate system to be UTM. First add the crs information
     #Thanks to ChatGPT for help setting this up, particularly the coordinate definition
@@ -71,7 +71,7 @@ def import_KGDK(inFiles,varID,internalVarName, **kwargs):
 
     # Add the CRS variable with UTM Zone 32 projection attributes
     #ds["crs"] = xr.DataArray(0, attrs=crs_attrs)
-    #ds[thisInp["varID"]].attrs['grid_mapping']="crs"   
+    #ds[thisInp["varCode"]].attrs['grid_mapping']="crs"   
 
     #Set the CF dimension names correctly
     ds.y.attrs['axis']="Y"
@@ -82,12 +82,12 @@ def import_KGDK(inFiles,varID,internalVarName, **kwargs):
     ds.lon.attrs['units']="degrees_east"
     ds.lat.attrs['standard_name']="latitude"
     ds.lat.attrs['units']="degrees_north"
-    ds[varID].attrs['coordinates'] = "lon lat"
+    ds[varCode].attrs['coordinates'] = "lon lat"
 
     #Ensure consistent ordering
     ds=ds.transpose("time","y","x")
     
     ## Convert to dataarray
-    da = ds[varID]  
+    da = ds[varCode]  
 
     return(da)

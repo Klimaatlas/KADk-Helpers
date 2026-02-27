@@ -9,11 +9,11 @@ import os
 import numpy as np
 import re
 
-def import_CORDEX(inFiles,varID,internalVarName, cutoutArgs, **kwargs):
+def import_CORDEX(inFiles,varCode,internalVarName, cutoutArgs, **kwargs):
     # Import --------------------------------------
     #Import using the default import functionality
     da=KAPy.defaultImport(inFiles=inFiles,
-                            varID=varID,
+                            varCode=varCode,
                             internalVarName=internalVarName)
 
     #Post import modifications ------------
@@ -38,7 +38,7 @@ def import_CORDEX(inFiles,varID,internalVarName, cutoutArgs, **kwargs):
 
     #Apply cutouts-----------------
     if cutoutArgs["method"] == "lonlatbox":
-        da=KAPy.cutout_lonlat(da,**cutoutArgs,varID=varID)
+        da=KAPy.cutout_lonlat(da,**cutoutArgs,varCode=varCode)
 
     return(da)
 

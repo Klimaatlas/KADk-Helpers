@@ -3,7 +3,7 @@
 # variable.
 import KAPy
 
-def import_DANRA(inFiles,varID,internalVarName, **kwargs):
+def import_DANRA(inFiles,varCode,internalVarName, **kwargs):
     """
     Import DANRA
 
@@ -20,20 +20,20 @@ def import_DANRA(inFiles,varID,internalVarName, **kwargs):
     """
     #Import using the default import functionality
     da=KAPy.defaultImport(inFiles=inFiles,
-                            varID=varID,
+                            varCode=varCode,
                             internalVarName=internalVarName)
 
     #Calculate daily binned values
-    if varID=="tas":
+    if varCode=="tas":
         da=da.resample(time='D').mean()
-    elif varID=="tasmax":
+    elif varCode=="tasmax":
         da=da.resample(time='D').max()
-    elif varID=="tasmin":
+    elif varCode=="tasmin":
         da=da.resample(time='D').min()
-    elif varID=="pr":
+    elif varCode=="pr":
         da=da.resample(time='D').sum()
         da.attrs['units']='mm/day'
     else:
-        raise ValueError(f"Unknown variable ID '{varID}' in DANRA import.")
+        raise ValueError(f"Unknown variable ID '{varCode}' in DANRA import.")
 
     return(da)
