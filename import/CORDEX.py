@@ -9,12 +9,13 @@ import os
 import numpy as np
 import re
 
-def import_CORDEX(inFiles,varCode,internalVarName, cutoutArgs, **kwargs):
+def import_CORDEX(inFiles,varCode,internalVarName, checks,cutoutArgs, **kwargs):
     # Import --------------------------------------
     #Import using the default import functionality
     da=KAPy.defaultImport(inFiles=inFiles,
                             varCode=varCode,
-                            internalVarName=internalVarName)
+                            internalVarName=internalVarName,
+                            checks=checks)
 
     #Post import modifications ------------
     inFnames=[os.path.basename(f) for f in inFiles]

@@ -1,25 +1,29 @@
-#Diurnal temperature range
+import xarray as xr
 
-def dtr(tasmax,tasmin):
+#Diurnal temperature range and skewness
+
+def dtr_skew(tasmax,tasmin,tas):
     dtr=(tasmax-tasmin) 
     dtr.attrs["units"] = "degC"
-   
-    return(dtr)
-    
-#Skewness
-def skew(tas,tasmax,tasmin):
+
     skew=tas-(tasmax+tasmin)/2 
     skew.attrs["units"] = "degC"
-    return(skew)
 
+    rtn=xr.Dataset({"dtr": dtr,
+                   "skew": skew})
 
-#Inversion functions
-def tasmax(tas,skew,dtr):
-    out=tas-skew+dtr/2
-    out.attrs['units']="degC"
-    return(out)
+    return(rtn)
+    
 
-def tasmin(tas,skew,dtr):
-    out=tas-skew-dtr/2
-    out.attrs['units']="degC"
-    return(out)
+#Inversion function
+def invert_dtr_skew(tas,skew,dtr):
+    tasmax=tas-skew+dtr/2
+    tasmax.attrs['units']="degC"
+
+    tasmin=tas-skew-dtr/2
+    tasmin.attrs['units']="degC"
+
+    rtn=xr.Dataset({"tasmin": tasmin,
+                   "tasmax": tasmax})
+
+    return(rtn)

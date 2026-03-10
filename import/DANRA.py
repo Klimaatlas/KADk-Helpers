@@ -3,7 +3,7 @@
 # variable.
 import KAPy
 
-def import_DANRA(inFiles,varCode,internalVarName, **kwargs):
+def import_DANRA(inFiles,varCode,internalVarName, checks,**kwargs):
     """
     Import DANRA
 
@@ -21,7 +21,8 @@ def import_DANRA(inFiles,varCode,internalVarName, **kwargs):
     #Import using the default import functionality
     da=KAPy.defaultImport(inFiles=inFiles,
                             varCode=varCode,
-                            internalVarName=internalVarName)
+                            internalVarName=internalVarName,
+                            checks=checks)
 
     #Calculate daily binned values
     if varCode=="tas":
