@@ -47,7 +47,7 @@ def import_KGDK(inFiles,varCode,internalVarName, checks,**kwargs):
 
     #Regrid 20km tas data onto 10km tasmax grid to allow calculation of e.g. skewness
     if varCode=="tas":
-        refGrd=helpers.readFile("/dmidata/projects/klimaatlas/dev/inputs/KGDK/tasmaxobs_2004-2019.nc")
+        refGrd=helpers.readFile("/dmidata/projects/klimaatlas/data/KGDK/tasmaxobs_2004-2019.nc")
         regrdr=xe.Regridder(dsIn,refGrd,
                             method="nearest_s2d",
                             unmapped_to_nan=False)  
