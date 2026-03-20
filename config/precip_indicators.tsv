@@ -1,6 +1,0 @@
-id	enabled	name	units	variables	datasets	seasons	timeBinning	statistic	deltaType	additionalArgs	customScriptPath	customScriptFunction
-i101	x	Annual / season mean precip	mm/day	pr	all	all	periods	mean	divide	{}		
-i102	x	Average maximum precip	mm/day	pr	all	all	periods	meanmax	divide	{}		
-i105	x	Days with more than 10mm precip	days	pr	all	all	periods	count	divide	{'threshold':'10','op':'gt'}		
-i106	x	Days with more than 20mm precip	days	pr	all	all	periods	count	divide	{'threshold':'20','op':'gt'}		
-i108	x	Number of dry days	days	pr	all	all	periods	count	divide	{'threshold':'1','op':'lt'}		
