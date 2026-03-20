@@ -23,8 +23,8 @@ def annual_temperature_range(tas):
 #same result can be obtained by averaging dtr, rather than
 #using tasmax and tasmin.
  
-def daily_temperature_range(tasmax,tasmin):
-    dtr=(tasmax-tasmin)
+def daily_temperature_range(ds):
+    dtr=(ds.tasmax-ds.tasmin)
     out=dtr.mean(dim="time")
     out.attrs['units']="degC"
   
@@ -61,10 +61,10 @@ if __name__ == "__main__":
     leaf=next(iter(wf['indicators'][indID]['input_dict']))
     inFiles=wf['indicators'][indID]['input_dict'][leaf]
 
-    tasmax=KAPy.readFile(inFiles['tasmax'])
-    tasmin=KAPy.readFile(inFiles['tasmin'])
+    ds=xr.Dataset({"tasmax":KAPy.readFile(inFiles['tasmax']),
+                   "tasmin":KAPy.readFile(inFiles['tasmin'])})
 
-    out=daily_temperature_range(tasmax,tasmin)
+    out=daily_temperature_range(ds)
 
     print("Done.")
     
