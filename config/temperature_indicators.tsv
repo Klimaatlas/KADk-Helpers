@@ -1,0 +1,15 @@
+indicator_codes	enabled	description	variables	datasets	seasons	timeBinning	statistic	deltaType	additionalArgs	customScriptPath	customScriptFunction
+i001	x	Annual mean temperature	tas	all	all	periods	mean	subtract	{}		
+i002	x	Daily max temperature	tasmax	all	all	periods	mean	subtract	{}		
+i003	x	Daily min temperature	tasmin	all	all	periods	mean	subtract	{}		
+i004	x	Annual max temperature	tasmax	all	all	periods	meanmax	subtract	{}		
+i005	x	Annual min temperature	tasmin	all	all	periods	meanmin	subtract	{}		
+i006	x	Annual temperature range	atr	all	ann	periods	mean	subtract	{}		
+i007	x	Diurnal temperature range	dtr	all	all	periods	mean	subtract	{}		
+i008	x	Heatwave days	tasmax	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/heatwaves.py	heatwaveDays
+i009	x	Warm-wave days	tasmax	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/heatwaves.py	warmwaveDays
+i010	x	Frost days	tasmin	all	all	periods	count	subtract	{'threshold':'0','op':'lt'}		
+i011	x	Growing season length	tas	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/growing_season.py	growingSeason
+i012	x	Growing season start	tas	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/growing_season.py	growingSeasonStart
+i014	x	Ice days	tasmax	all	all	periods	count	subtract	{'threshold':'0','op':'lt'}		
+i015	x	Growing season end	tas	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/growing_season.py	growingSeasonEnd
