@@ -34,6 +34,8 @@ def import_DANRA(inFiles,varCode,internalVarName, checks,**kwargs):
     elif varCode=="pr":
         da=da.resample(time='D').sum()
         da.attrs['units']='mm/day'
+    elif varCode=="sfcWind":
+        da=da.resample(time='D').mean()
     else:
         raise ValueError(f"Unknown variable ID '{varCode}' in DANRA import.")
 
