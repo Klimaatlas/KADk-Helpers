@@ -8,24 +8,57 @@ import KAPy
 import os
 import numpy as np
 import re
+import xarray as xr
 
 def import_CORDEX(inFiles,varCode,internalVarName, checks,cutoutArgs, **kwargs):
     # Import --------------------------------------
+    #Get list of filenames
+    inFnames=[os.path.basename(f) for f in inFiles]
+   
     # The sfcWind HadGEM2 / RegCM4 historical run has the supplementary coordinates labelled as "xlon" and "xlat",
     # which is a mistake - they should be "lon" and "lat". The problem is only in the historical runs though
     # and a nice workaround based on the fact that xarray interprets the first file as the template for the
     # rest. Reversing the file order, so that the rcps are first, achieves this.
-    if  any(re.search(".*sfcWind_EUR-11_MOHC-HadGEM2-ES_historical_r1i1p1_ICTP-RegCM4-6_v1_day.*", f) for f in inFiles):
-        inFiles.reverse()
+    if  any(re.search(".*sfcWind_EUR-11_MOHC-HadGEM2-ES_historical_r1i1p1_ICTP-RegCM4-6_v1_day.*", f) for f in inFnames):
+        time_coder=xr.coders.CFDatetimeCoder(use_cftime=True)
+        try:
+            dsIn = xr.open_mfdataset(
+                inFiles,
+                chunks={"time": 256},
+                combine="nested",
+                concat_dim="time",
+                decode_times=time_coder,
+                decode_cf=False,
+                join="override",
+                compat="override",
+                coords="minimal",
+                data_vars=["sfcWind"])
+            
+        except Exception as e:
+            raise RuntimeError(f"Opening following NetCDF files:\n '{inFiles}'\n failed with error:\n{e}")	
+        
+        #Correct supplementary coordinates
+        dsIn = dsIn.set_coords(["lat", "lon"])
+        
+        # Select the desired variable to give a and rename to the variable code
+        da = dsIn[internalVarName]
+        da.name= varCode
 
-    #Import using the default import functionality
-    da=KAPy.defaultImport(inFiles=inFiles,
-                            varCode=varCode,
-                            internalVarName=internalVarName,
-                            checks=checks)
+        # Drop the m10 degenerate dimension. 
+        # We drop time_bnds explicitly here - this mirrors what xarray would do anyway when working with
+        # a dataarray. Might need to fix in the future.
+        da = da.squeeze(drop=True)
+        da["time"].attrs.pop("bounds")
+        da.attrs.pop("coordinates")
+    
+    else:
+        #Import using the default import functionality
+        da=KAPy.defaultImport(inFiles=inFiles,
+                                varCode=varCode,
+                                internalVarName=internalVarName,
+                                checks=checks)
 
     #Post import modifications ------------
-    inFnames=[os.path.basename(f) for f in inFiles]
     
     #Problems with x and y coordinates being indentical that needs to be fixed        
     if  any(re.search(".*_EUR-11_MPI-M-MPI-ESM-LR_rcp85_r1i1p1_IPSL-WRF381P_v1_day_20060101-21001231.nc", f) for f in inFnames):
@@ -43,12 +76,6 @@ def import_CORDEX(inFiles,varCode,internalVarName, checks,cutoutArgs, **kwargs):
             useThis=da.lon.isel(time=0,drop=True)
             da = da.drop_vars('lon')
             da = da.assign_coords(lon=useThis)
-
-    # if  any(re.search("sfcWind_EUR-11_MOHC-HadGEM2-ES_historical_r1i1p1_ICTP-RegCM4-6_v1_day.*", f) for f in inFnames):
-    #     print(da)
-    #     da.encoding["coordinates"] = "lat lon"
-    #     da.attrs.pop('grid_mapping')
-    #     da.time.attrs.pop('bounds')
 
 
     #Apply cutouts-----------------
