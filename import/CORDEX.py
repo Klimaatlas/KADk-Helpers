@@ -11,6 +11,13 @@ import re
 
 def import_CORDEX(inFiles,varCode,internalVarName, checks,cutoutArgs, **kwargs):
     # Import --------------------------------------
+    # The sfcWind HadGEM2 / RegCM4 historical run has the supplementary coordinates labelled as "xlon" and "xlat",
+    # which is a mistake - they should be "lon" and "lat". The problem is only in the historical runs though
+    # and a nice workaround based on the fact that xarray interprets the first file as the template for the
+    # rest. Reversing the file order, so that the rcps are first, achieves this.
+    if  any(re.search(".*sfcWind_EUR-11_MOHC-HadGEM2-ES_historical_r1i1p1_ICTP-RegCM4-6_v1_day.*", f) for f in inFiles):
+        inFiles.reverse()
+
     #Import using the default import functionality
     da=KAPy.defaultImport(inFiles=inFiles,
                             varCode=varCode,
@@ -36,6 +43,13 @@ def import_CORDEX(inFiles,varCode,internalVarName, checks,cutoutArgs, **kwargs):
             useThis=da.lon.isel(time=0,drop=True)
             da = da.drop_vars('lon')
             da = da.assign_coords(lon=useThis)
+
+    # if  any(re.search("sfcWind_EUR-11_MOHC-HadGEM2-ES_historical_r1i1p1_ICTP-RegCM4-6_v1_day.*", f) for f in inFnames):
+    #     print(da)
+    #     da.encoding["coordinates"] = "lat lon"
+    #     da.attrs.pop('grid_mapping')
+    #     da.time.attrs.pop('bounds')
+
 
     #Apply cutouts-----------------
     if cutoutArgs["method"] == "lonlatbox":
