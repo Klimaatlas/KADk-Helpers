@@ -77,6 +77,10 @@ def import_CORDEX(inFiles,varCode,internalVarName, checks,cutoutArgs, **kwargs):
             da = da.drop_vars('lon')
             da = da.assign_coords(lon=useThis)
 
+    #NorESM - crCLIM model seems to have strange temperature values in the summer of 2100. We remove
+    #this year for tas, tasmin and tasmax.
+    if  any(re.search("tas.*_EUR-11_NCC-NorESM1-M_rcp85_r1i1p1_CLMcom-ETH-COSMO-crCLIM-v1-1_v1_day_.*", f) for f in inFnames):
+        da=da.sel(time=slice(None,"2100-01-01"))
 
     #Apply cutouts-----------------
     if cutoutArgs["method"] == "lonlatbox":
