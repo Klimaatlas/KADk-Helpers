@@ -12,5 +12,5 @@ vars=("tas" "tasmin" "tasmax")
 # Loop over variables and find files
 for var in "${vars[@]}"; do
     # Find and link files
-    find $SRCDIR -path "*/merged_files/*" -name "${var}_*_day_*.nc" > "../inputs/CORDEX6-${var}"
+    find $SRCDIR -path "*/merged_files/*" -name "${var}_*_day_*.nc" > "CORDEX6-${var}"
 done

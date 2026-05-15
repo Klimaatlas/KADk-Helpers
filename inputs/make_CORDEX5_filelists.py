@@ -3,8 +3,8 @@ from pathlib import Path
 import fnmatch
 
 SRCDIR = Path("/dmidata/projects/klimaatlas/data/CORDEX5/DAY_EUR11_FULL")
-OUTDIR = Path("/dmidata/projects/klimaatlas/dev/inputs/")
-VARS = ["tas", "tasmin", "tasmax","pr","sfcWind"]
+OUTDIR = Path(".")
+VARS = ["tas", "tasmin", "tasmax","pr","sfcWind","sfcWindmax"]
 
 # --------------------------------------------------
 # Collect files
@@ -30,6 +30,8 @@ patterns = [
     # * RegCM4 experiments that start in Dec 2005 rather than Jan 2006
     "*ICTP-RegCM4-6_v1*20051201-2005123?*",
     "*ICTP-RegCM4-6_v1*20051201-20060101*",
+    # * NOAA model only has rcp26 run, but not historical. 
+    "*EUR-11_NOAA-GFDL-GFDL-ESM2G_rcp26_r1i1p1_GERICS-REMO2015_v1_day*"
 ]
 
 # Remove files for IPSL WRF381P. The archive has files that cover both 5 year and 10 year time windows, that appear to be complete duplicates of each other. We remove all 10 year versions. But it requires a lot of manual work!
