@@ -4,7 +4,7 @@ import fnmatch
 
 SRCDIR = Path("/dmidata/projects/klimaatlas/data/CORDEX5/DAY_EUR11_FULL")
 OUTDIR = Path(".")
-VARS = ["tas", "tasmin", "tasmax","pr","sfcWind","sfcWindmax"]
+VARS = ["tas", "tasmin", "tasmax","pr","sfcWind","sfcWindmax","rsds"]
 
 # --------------------------------------------------
 # Collect files
