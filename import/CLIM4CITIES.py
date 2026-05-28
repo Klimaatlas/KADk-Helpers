@@ -41,6 +41,7 @@ def import_CLIM4CITIES(inFiles,varCode,internalVarName, checks, **kwargs):
                                 coords="minimal",
                                 data_vars="minimal",
                                 chunks={"time": 256},
+                                parallel=True,
                                 preprocess=lambda ds: ds[[internalVarName]])
 
     except Exception as e:
@@ -81,7 +82,12 @@ def import_CLIM4CITIES(inFiles,varCode,internalVarName, checks, **kwargs):
     #-------------End modified defaultImport--------------
 
     #Modify the datetime variable
-    da=da.rename({"datetime": "time"})
+    if "datetime" in da.dims:
+        da = da.rename({"datetime": "time"})
+    elif "date" in da.dims:
+        da = da.rename({"date": "time"})
+    elif "time" not in da.dims:
+        raise ValueError("Cannot figure out how to handle naming of time dimension.")
 
     #Set lon,lat coordinates
     da.lon.attrs['standard_name']="longitude"
