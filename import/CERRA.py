@@ -1,7 +1,7 @@
 import KAPy
 import xarray as xr
 
-def import_CERRA(inFiles,varCode,internalVarName, checks, **kwargs):
+def import_CERRA(inFiles,varCode,internalVarName, checks, cutoutArgs,**kwargs):
 
     """
     Import CERRA data
@@ -9,6 +9,7 @@ def import_CERRA(inFiles,varCode,internalVarName, checks, **kwargs):
     The CERRA dataset uses defaultImport(), but requires the following modifications
      * the valid_time dimension needs to be renamed to time
      * the dataset is on a three-hourly time steps - need to calculate daily values from there.
+     * use the native chunking of the dataset to start with
 
     Args:
         config (_type_): _description_
@@ -20,10 +21,15 @@ def import_CERRA(inFiles,varCode,internalVarName, checks, **kwargs):
     da=KAPy.defaultImport(inFiles=inFiles,
                             varCode=varCode,
                             internalVarName=internalVarName,
-                            checks=checks)
+                            checks=checks,
+                            chunks={})  #Use native chunking
     
     #Modify the datetime variable
     da = da.rename({"valid_time": "time"})
+
+    #Apply cutouts-----------------
+    if cutoutArgs["method"] == "lonlatbox":
+        da=KAPy.cutout_lonlat(da,**cutoutArgs,varCode=varCode)
 
     #Calculate daily averages
     if varCode=="tas":
