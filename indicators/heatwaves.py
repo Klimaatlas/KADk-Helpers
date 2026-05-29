@@ -20,7 +20,7 @@ def identifyHeatwaves(tasmax: xr.DataArray,
     return aboveThresh, rollMean
 
 
-def DMIHeatwave(tasmax: xr.DataArray,
+def genericHeatwaveDays(tasmax: xr.DataArray,
                 threshold: float):
     """
     Generic implementation of DMI's approach to calculating heatwaves. A ’heatwave day’ is 
@@ -45,34 +45,26 @@ def DMIHeatwave(tasmax: xr.DataArray,
     #Identify the heatwaves
     aboveThresh,_=identifyHeatwaves(tasmax=tasmax,threshold=threshold)
 
-    #A heatwave is defined as three days in a row but only the first day
-    #counts towards the number of HW days. 
-    #durationCriteria=aboveThresh.rolling({"time":3}).sum()==3
+    #Get number of days above the threshold
+    daysAboveThreshhold=aboveThresh.groupby("time.year").sum().mean(dim="year")
 
-    #Get number of days
-    #out=durationCriteria.groupby("time.year").sum().mean(dim="year")
-    out=aboveThresh.groupby("time.year").sum().mean(dim="year")
+    #Check for missing data. Any missing values in the timeseries
+    #should give an NaN. Create a mask and apply.
+    nan_mask = tasmax.isnull().any(dim="time")
+    res=daysAboveThreshhold.where(~nan_mask)
 
-    #TODO: Discuss how we handle null values
-    #    # RETTELSE: Vi tjekker om der mangler data langs 'time' aksen, 
-    # # men bevarer de rumlige dimensioner ('rlat', 'rlon')
-    # nan_mask = tasmax.isnull().any(dim="time")
-    
-    # # Anvend masken direkte på out
-    # return out.where(~nan_mask)
-
-    return out
+    return res
 
 
 
 # Main functions (to be called externally) ----------------
 def heatwaveDays(tasmax):
     """Calculate heatwave days using a 28°C threshold."""    
-    return DMIHeatwave(tasmax,threshold=28)
+    return genericHeatwaveDays(tasmax,threshold=28)
 
 def warmwaveDays(tasmax):
     """Calculate warmwave days using a 25°C threshold."""
-    return DMIHeatwave(tasmax,threshold=25)
+    return genericHeatwaveDays(tasmax,threshold=25)
 
 
 
@@ -84,33 +76,44 @@ if __name__ == "__main__":
     import pandas as pd
 
     #Create a synthetic dataset for testing
-    #We create a sinusoidal temperature time series with two components:
-    # * a low frequency element ranging from 20 to 30 degrees and back over 90 days. 
+    #We create a sinusoidal temperature time series with the following components
+    # * a low frequency element simulating start of a season or heatwave
     # * a high frequency element that simulates (deterministic) noise
-    t=np.arange(0,31)
-    y=20+10*np.sin(t/180*2*np.pi)+0.5*np.sin(t*np.exp(1))
-    #Wrap into a dataarray
-    time = pd.Timestamp("2000-01-01") + pd.to_timedelta(t, unit="D")
-    da = xr.DataArray(
-        y,
-        dims=["time"],
-        coords={"time": time},
-        name="tasmax",
-        attrs={"units": "degC"})
+    t=np.arange(0,21)
+    y=22+10*np.sin(t/180*2*np.pi)+0.5*np.sin(t*np.exp(1))
     
-    #Identify thresholds
-    thisThreshold=25
-    aboveThresh,rollMean=identifyHeatwaves(tasmax=da,threshold=thisThreshold)
+    #We consider two versions of this data - one with the full dataset
+    #and one with NANs in the time series corresponding to a masked field over water
+    for addNaNs in [False,True]:
+        if not addNaNs:
+            print("Full dataset---------------------")
+        else:
+            print("And now with NaNs----------------")
+            y[-8:-6]=np.nan
 
-    #Plot 
-    da.plot.line("o",label="tasmax")
-    rollMean.plot.line("+-",label="rollMean")
-    (thisThreshold-0.5+aboveThresh).plot.line("-x",label="aboveThresh")
-    plt.axhline(y=thisThreshold,color="red")
-    plt.legend()
-     
-    #Get number of days
-    out=DMIHeatwave(da,threshold=thisThreshold)
-    print(out)
+        #Wrap into a dataarray
+        time = pd.Timestamp("2000-01-01") + pd.to_timedelta(t, unit="D")
+        da = xr.DataArray(
+            y,
+            dims=["time"],
+            coords={"time": time},
+            name="tasmax",
+            attrs={"units": "degC"})
+        
+        #Identify thresholds
+        thisThreshold=25
+        aboveThresh,rollMean=identifyHeatwaves(tasmax=da,threshold=thisThreshold)
+
+        #Plot 
+        da.plot.line("o",label="tasmax")
+        rollMean.plot.line("+-",label="rollMean")
+        (thisThreshold-0.5+aboveThresh).plot.line("-x",label="aboveThresh")
+        plt.axhline(y=thisThreshold,color="red")
+        plt.legend()
+        plt.show()
+        
+        #Get number of days
+        out=genericHeatwaveDays(da,threshold=thisThreshold)
+        print(f"Number of heatwave days detected: {out.data}")
 
 
