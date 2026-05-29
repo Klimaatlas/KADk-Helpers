@@ -50,7 +50,7 @@ def identify_heatwave_days(
     return above_threshold, rolling_mean
 
 
-def generic_heatwave_days(tasmax: xr.DataArray, threshold: float) -> xr.DataArray:
+def count_heatwave_days(tasmax: xr.DataArray, threshold: float) -> xr.DataArray:
     """
     Calculate the mean annual number of heatwave days.
     """
@@ -73,14 +73,14 @@ def heatwave_days(tasmax) -> xr.DataArray:
     """
     Calculate heatwave days using a 28°C threshold.
     """
-    return generic_heatwave_days(tasmax, threshold=28)
+    return count_heatwave_days(tasmax, threshold=28)
 
 
 def warmwave_days(tasmax) -> xr.DataArray:
     """
     Calculate warmwave days using a 25°C threshold.
     """
-    return generic_heatwave_days(tasmax, threshold=25)
+    return count_heatwave_days(tasmax, threshold=25)
 
 
 # Validation --------------------------------------
@@ -135,5 +135,5 @@ if __name__ == "__main__":
         plt.show()
 
         # Get number of days
-        out = generic_heatwave_days(da, threshold=this_threshold)
+        out = count_heatwave_days(da, threshold=this_threshold)
         print(f"Number of heatwave days detected: {out.data}")
