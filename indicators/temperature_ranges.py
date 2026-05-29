@@ -23,8 +23,8 @@ def annual_temperature_range(tas):
 #same result can be obtained by averaging dtr, rather than
 #using tasmax and tasmin.
  
-def daily_temperature_range(ds):
-    dtr=(ds.tasmax-ds.tasmin)
+def daily_temperature_range(tasmax,tasmin):
+    dtr=(tasmax-tasmin)
     out=dtr.mean(dim="time")
     out.attrs['units']="degC"
   
