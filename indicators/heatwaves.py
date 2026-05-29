@@ -4,7 +4,8 @@ heatwaves.py
 Generic implementation of DMI's approach to calculating heatwaves. A heatwave day is identified
 when the 3-day rolling mean (right-aligned) of daily maximum temperature exceeds the threshold.
 In this way, the first two days of each heatwave don't contribute to the count, even though they can
-be above the threshold
+be above the threshold. Note also that we count the number of days where we are in a heatwave state,
+rather than the number of heatwave events.
 
 Parameters
 ----------
@@ -21,13 +22,16 @@ xr.DataArray
     Mean annual number of heatwave days.
 """
 
+# Public API-----------------
+__all__ = ["heatwave_days", "warmwave_days", "count_heatwave_days"]
+
 # Imports -------------------
 import xarray as xr
 import xclim
 
 
-# Helper functions ---------------------------------
-def identify_heatwave_days(
+# Private helper functions ---------------------------------
+def _identify_heatwave_days(
     tasmax: xr.DataArray, threshold: float
 ) -> tuple[xr.DataArray, xr.DataArray]:
     """
@@ -35,11 +39,20 @@ def identify_heatwave_days(
     for those points in time/space that are in a heatwave state.
     """
     # Assert what we have
-    assert "time" in tasmax.dims, "tasmax must contain a 'time' dimension"
-    assert "units" in tasmax.attrs, "tasmax must define units"
+    if "time" not in tasmax.dims:
+        raise ValueError("tasmax must contain a 'time' dimension")
+    if "units" not in tasmax.attrs:
+        raise ValueError("tasmax must define units")
+
+    # Assert daily time resolution
+    time_resolution = xr.infer_freq(tasmax.time)
+    if time_resolution not in ["D", "1D"]:
+        raise ValueError(
+            f"tasmax must have daily time resolution, 'D', but received '{time_resolution}'."
+        )
 
     # Apply three day rolling mean - right aligned by default
-    rolling_mean = tasmax.rolling({"time": 3}).mean()
+    rolling_mean = tasmax.rolling(time=3, min_periods=3).mean()
 
     # Check for values higher than the threshold, taking
     # care that the units are correct
@@ -50,12 +63,13 @@ def identify_heatwave_days(
     return above_threshold, rolling_mean
 
 
+# Generic public function -----------------
 def count_heatwave_days(tasmax: xr.DataArray, threshold: float) -> xr.DataArray:
     """
     Calculate the mean annual number of heatwave days.
     """
     # Identify the heatwaves
-    above_threshold, _ = identify_heatwave_days(tasmax=tasmax, threshold=threshold)
+    above_threshold, _ = _identify_heatwave_days(tasmax=tasmax, threshold=threshold)
 
     # Get number of days above the threshold
     days_above_threshold = above_threshold.groupby("time.year").sum().mean(dim="year")
@@ -68,15 +82,15 @@ def count_heatwave_days(tasmax: xr.DataArray, threshold: float) -> xr.DataArray:
     return result
 
 
-# Main functions (to be called externally) ----------------
-def heatwave_days(tasmax) -> xr.DataArray:
+# Convenience wrappers ---------------------
+def heatwave_days(tasmax: xr.DataArray) -> xr.DataArray:
     """
     Calculate heatwave days using a 28°C threshold.
     """
     return count_heatwave_days(tasmax, threshold=28)
 
 
-def warmwave_days(tasmax) -> xr.DataArray:
+def warmwave_days(tasmax: xr.DataArray) -> xr.DataArray:
     """
     Calculate warmwave days using a 25°C threshold.
     """
@@ -99,15 +113,15 @@ if __name__ == "__main__":
 
     # We consider two versions of this data - one with the full dataset
     # and one with NANs in the time series corresponding to a masked field over water
-    for add_NaNs in [False, True]:
-        if not add_NaNs:
-            ttl = "Full dataset"
+    for add_nans in [False, True]:
+        if not add_nans:
+            figure_title = "Full dataset"
             y = src_y.copy()
         else:
-            ttl = "Dataset with NaNs added"
+            figure_title = "Dataset with NaNs added"
             y = src_y.copy()
             y[-8:-6] = np.nan
-        print(f"{ttl}----------------------------------")
+        print(f"{figure_title}----------------------------------")
 
         # Wrap into a dataarray
         time = pd.Timestamp("2000-01-01") + pd.to_timedelta(t, unit="D")
@@ -121,17 +135,19 @@ if __name__ == "__main__":
 
         # Identify thresholds
         this_threshold = 25
-        above_threshold, rolling_mean = identify_heatwave_days(
+        above_threshold, rolling_mean = _identify_heatwave_days(
             tasmax=da, threshold=this_threshold
         )
 
         # Plot
         da.plot.line("o", label="tasmax")
-        rolling_mean.plot.line("+-", label="rollMean")
-        (this_threshold - 0.5 + above_threshold).plot.line("-x", label="aboveThresh")
+        rolling_mean.plot.line("+-", label="Three-day rollingmean")
+        (this_threshold - 0.5 + above_threshold).plot.line(
+            "-x", label="Heatwave detection"
+        )
         plt.axhline(y=this_threshold, color="red")
         plt.legend()
-        plt.title(ttl)
+        plt.title(figure_title)
         plt.show()
 
         # Get number of days
