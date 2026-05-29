@@ -1,105 +1,139 @@
-# Calculate number of heatwave and warmwave days
-# A ’heatwave day’ is indicated when the average of the maximum temperature,
-#  over at least three consecutive days, is above 28°C, not counting the
-# first two days of each heatwave. A "warmwave" is the same definition for 25C
-
 """
-#Setup for debugging with VS code
-import os
-print(os.getcwd())
-os.chdir("KAPy/workflow")
-import KAPy
-os.chdir("../..")
-config=KAPy.getConfig("./config/config.yaml")  
-wf=KAPy.getWorkflow(config)
-indID='i008'
-outFile=list(wf['indicators'][indID])[0]
-outFile='outputs/05.indicators/i008/i008_BC-KGDK_KGDK_historical+rcp85_NCC-NorESM1-M_r1i1p1_SMHI-RCA4_v1.nc'
-inFile=wf['indicators'][indID][outFile]
-tasmax = KAPy.helpers.readFile(inFile[0])
-tasmax=tasmax.compute()
-%matplotlib inline
-import matplotlib.pyplot as plt
+heatwaves.py
 
+Generic implementation of DMI's approach to calculating heatwaves. A heatwave day is identified
+when the 3-day rolling mean (right-aligned) of daily maximum temperature exceeds the threshold.
+In this way, the first two days of each heatwave don't contribute to the count, even though they can
+be above the threshold
 
+Parameters
+----------
+tasmax : xr.DataArray
+    Daily maximum temperature. The time dimension should be called 'time' and have daily
+    resolution. Heatwave statistics are calculated over other (spatial) dimensions but are not
+    referenced directly, and can therefore have arbitrary names.
+threshold : float
+    Temperature threshold in degrees C, above heatwave counting is triggered.
+
+Returns
+-------
+xr.DataArray
+    Mean annual number of heatwave days.
 """
 
+# Imports -------------------
 import xarray as xr
 import xclim
 
-def genericHeatwave(tasmax,threshold=28):
-    #Apply three day rolling mean - right aligned by default
-    rollMean=tasmax.rolling({"time":3}).mean()
 
-    #Check for values higher than the threshold, taking
-    #care that the units are correct
-    aboveThresh=xclim.core.units.convert_units_to(rollMean ,"degC") > threshold
+# Helper functions ---------------------------------
+def identify_heatwave_days(
+    tasmax: xr.DataArray, threshold: float
+) -> tuple[xr.DataArray, xr.DataArray]:
+    """
+    Identify heatwave days for a given threshold and return a true/false mask
+    for those points in time/space that are in a heatwave state.
+    """
+    # Assert what we have
+    assert "time" in tasmax.dims, "tasmax must contain a 'time' dimension"
+    assert "units" in tasmax.attrs, "tasmax must define units"
 
-    #A heatwave is defined as three days in a row but only the first day
-    #counts towards the number of HW days. 
-    #durationCriteria=aboveThresh.rolling({"time":3}).sum()==3
+    # Apply three day rolling mean - right aligned by default
+    rolling_mean = tasmax.rolling({"time": 3}).mean()
 
-    #Get number of days
-    #out=durationCriteria.groupby("time.year").sum().mean(dim="year")
-    out=aboveThresh.groupby("time.year").sum().mean(dim="year")
+    # Check for values higher than the threshold, taking
+    # care that the units are correct
+    above_threshold = (
+        xclim.core.units.convert_units_to(rolling_mean, "degC") > threshold
+    )
 
-    return out
-
-
-def heatwaveDays(tasmax):
-    return genericHeatwave(tasmax,threshold=28)
-
-def warmwaveDays(tasmax):
-    return genericHeatwave(tasmax,threshold=25)
-
-""" 
-#Plotting function to check definitions
-this = KAPy.helpers.readFile(inFile[0])
-selThis={'time':slice(None,30),'x':10,'y':10}
-tasmax=this.isel(selThis).compute()
-
-import xarray as xr
-import numpy as np
-threshold=25
-
-# Load fredriks values into a NumPy array
-tasmax = np.loadtxt("/dmidata/projects/klimaatlas/fbo/warmdaytest/CanESM_CLMcom_year2071_rcp85_lat10_lon15.txt")
-da = xr.DataArray(values, dims="time", name="tasmax")
-
-#And his indicators
-ind=np.loadtxt("/dmidata/projects/klimaatlas/fbo/warmdaytest/CanESM_CLMcom_year2071_rcp85_lat10_lon15_warmdays.txt")
-ind = xr.DataArray(ind, dims="time", name="indicator")+1
-
-# Slice
-thisSlice={"time": slice(160,190)}
-da = da.isel(thisSlice)
-ind=ind.isel(thisSlice)
-
-#Apply three day rolling mean - right aligned
-rollMean=da.rolling({"time":3}).mean()
-
-#Check for values higher than the threshold, taking
-#care that the units are correct
-aboveThresh=rollMean > threshold
-
-#A heatwave is defined as three days in a row but only the first day
-#counts towards the number of HW days. 
-durationCriteria=aboveThresh.rolling({"time":3}).sum()==3
-
-#Get number of days
-out=aboveThresh.sum().mean()
-print(out)
-
-da.plot.line("o-",label="tasmax")
-rollMean.plot.line("x-",label="rollMean")
-aboveThresh.plot.line("-x",label="aboveThresh")
-#durationCriteria.plot.line("-x",label="durationCriteria")
-ind.plot.line("-+",label="FBO warm day")
-plt.axhline(y=threshold,color="red")
-plt.legend()
-plt.savefig("Warm_wave.png", dpi=300)
+    return above_threshold, rolling_mean
 
 
-"""
+def count_heatwave_days(tasmax: xr.DataArray, threshold: float) -> xr.DataArray:
+    """
+    Calculate the mean annual number of heatwave days.
+    """
+    # Identify the heatwaves
+    above_threshold, _ = identify_heatwave_days(tasmax=tasmax, threshold=threshold)
+
+    # Get number of days above the threshold
+    days_above_threshold = above_threshold.groupby("time.year").sum().mean(dim="year")
+
+    # Check for missing data. Any missing values in the timeseries
+    # should give an NaN. Create a mask and apply.
+    nan_mask = tasmax.isnull().any(dim="time")
+    result = days_above_threshold.where(~nan_mask)
+
+    return result
 
 
+# Main functions (to be called externally) ----------------
+def heatwave_days(tasmax) -> xr.DataArray:
+    """
+    Calculate heatwave days using a 28°C threshold.
+    """
+    return count_heatwave_days(tasmax, threshold=28)
+
+
+def warmwave_days(tasmax) -> xr.DataArray:
+    """
+    Calculate warmwave days using a 25°C threshold.
+    """
+    return count_heatwave_days(tasmax, threshold=25)
+
+
+# Validation --------------------------------------
+if __name__ == "__main__":
+    # Imports for use here
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import pandas as pd
+
+    # Create a synthetic dataset for testing
+    # We create a sinusoidal temperature time series with the following components
+    # * a low frequency element simulating start of a season or heatwave
+    # * a high frequency element that simulates (deterministic) noise
+    t = np.arange(0, 21)
+    src_y = 22 + 10 * np.sin(t / 180 * 2 * np.pi) + 0.5 * np.sin(t * np.exp(1))
+
+    # We consider two versions of this data - one with the full dataset
+    # and one with NANs in the time series corresponding to a masked field over water
+    for add_NaNs in [False, True]:
+        if not add_NaNs:
+            ttl = "Full dataset"
+            y = src_y.copy()
+        else:
+            ttl = "Dataset with NaNs added"
+            y = src_y.copy()
+            y[-8:-6] = np.nan
+        print(f"{ttl}----------------------------------")
+
+        # Wrap into a dataarray
+        time = pd.Timestamp("2000-01-01") + pd.to_timedelta(t, unit="D")
+        da = xr.DataArray(
+            y,
+            dims=["time"],
+            coords={"time": time},
+            name="tasmax",
+            attrs={"units": "degC"},
+        )
+
+        # Identify thresholds
+        this_threshold = 25
+        above_threshold, rolling_mean = identify_heatwave_days(
+            tasmax=da, threshold=this_threshold
+        )
+
+        # Plot
+        da.plot.line("o", label="tasmax")
+        rolling_mean.plot.line("+-", label="rollMean")
+        (this_threshold - 0.5 + above_threshold).plot.line("-x", label="aboveThresh")
+        plt.axhline(y=this_threshold, color="red")
+        plt.legend()
+        plt.title(ttl)
+        plt.show()
+
+        # Get number of days
+        out = count_heatwave_days(da, threshold=this_threshold)
+        print(f"Number of heatwave days detected: {out.data}")
