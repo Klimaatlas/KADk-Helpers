@@ -27,6 +27,10 @@ def import_CERRA(inFiles,varCode,internalVarName, checks, cutoutArgs,**kwargs):
     #Modify the datetime variable
     da = da.rename({"valid_time": "time"})
 
+    #Correct the coordinates attribute, which has been invalidated
+    #when we drop expver and rename valid_time to time:
+    da.encoding['coordinates'] = "latitude longitude"
+
     #Apply cutouts-----------------
     if cutoutArgs["method"] == "lonlatbox":
         da=KAPy.cutout_lonlat(da,**cutoutArgs,varCode=varCode)
