@@ -23,7 +23,7 @@ xr.DataArray
 """
 
 # Public API-----------------
-__all__ = ["heatwave_days", "warmwave_days", "count_heatwave_days"]
+__all__ = ["heatwaveDays", "warmwaveDays", "count_heatwave_days"]
 
 # Imports -------------------
 import xarray as xr
@@ -83,14 +83,14 @@ def count_heatwave_days(tasmax: xr.DataArray, threshold: float) -> xr.DataArray:
 
 
 # Convenience wrappers ---------------------
-def heatwave_days(tasmax: xr.DataArray) -> xr.DataArray:
+def heatwaveDays(tasmax: xr.DataArray) -> xr.DataArray:
     """
     Calculate heatwave days using a 28°C threshold.
     """
     return count_heatwave_days(tasmax, threshold=28)
 
 
-def warmwave_days(tasmax: xr.DataArray) -> xr.DataArray:
+def warmwaveDays(tasmax: xr.DataArray) -> xr.DataArray:
     """
     Calculate warmwave days using a 25°C threshold.
     """

@@ -1,0 +1,39 @@
+indicator_codes	enabled	description	variables	datasets	seasons	timeBinning	statistic	deltaType	additionalArgs	customScriptPath	customScriptFunction
+## Temperature											
+i001	x	Annual mean temperature	tas	all	all	periods	mean	subtract	{}		
+i002	x	Daily max temperature	tasmax	all	all	periods	mean	subtract	{}		
+i003	x	Daily min temperature	tasmin	all	all	periods	mean	subtract	{}		
+i004	x	Annual max temperature	tasmax	all	all	periods	meanmax	subtract	{}		
+i005	x	Annual min temperature	tasmin	all	all	periods	meanmin	subtract	{}		
+i006	x	Annual temperature range	tas	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/temperature_ranges.py	annualTemperatureRange
+i007	x	Diurnal temperature range	tasmin,tasmax	all	all	periods	custom	subtract	{}	KADk-Helpers/indicators/temperature_ranges.py	dailyTemperatureRange
+i008	x	Heatwave days	tasmax	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/heatwaves.py	heatwaveDays
+i009	x	Warm-wave days	tasmax	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/heatwaves.py	warmwaveDays
+i010	x	Frost days	tasmin	all	all	periods	custom	subtract	{}	KADk-Helpers/indicators/frost_days.py	frostDays
+i011	x	Growing season length	tas	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/growing_season.py	growingSeasonLength
+i012	x	Growing season start	tas	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/growing_season.py	growingSeasonStart
+i013	x	Frost days during start of growing season	tas,tasmin	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/frost_during_growing_season.py	frostGrowingSeason
+i014	x	Ice days	tasmax	all	all	periods	custom	subtract	{}	KADk-Helpers/indicators/ice_days.py	iceDays
+i015	x	Growing season end	tas	all	ann	periods	custom	subtract	{}	KADk-Helpers/indicators/growing_season.py	growingSeasonEnd
+i016	x	Freeze thaw days	tasmin,tasmax	all	all	periods	custom	subtract	{}	KADk-Helpers/indicators/freeze_thaw_days.py	freezeThawDays
+## Precipitation											
+i101	x	Annual / season mean precip	pr	all	all	periods	mean	divide	{}		
+i102	x	Average maximum precip	pr	all	all	periods	meanmax	divide	{}		
+i103	x	Maximum 5-day precip	pr	all	all	periods	custom	divide	{}	KADk-Helpers/indicators/maximum_precip.py	maximum5dayPrecip
+i104	x	Maximum 14-day precip	pr	all	all	periods	custom	divide	{}	KADk-Helpers/indicators/maximum_precip.py	maximum14dayPrecip
+i105	x	Days with more than 10mm precip	pr	all	all	periods	custom	divide	{}	KADk-Helpers/indicators/wet_days.py	daysAbove10mm
+i106	x	Days with more than 20mm precip	pr	all	all	periods	custom	divide	{}	KADk-Helpers/indicators/wet_days.py	daysAbove20mm
+i108	x	Number of dry days	pr	all	all	periods	custom	divide	{}	KADk-Helpers/indicators/dry_days.py	dryDays
+i109	x	Longest dry spell	pr	all	all	periods	custom	divide	{}	KADk-Helpers/indicators/longest_dry_spell.py	longestDrySpell
+i110		Fraction of dry seasons	pr	all	all	periods	custom	divide	{}		
+i111		Fraction of wet seasons	pr	all	all	periods	custom	divide	{}		
+i112	x	Number of 5-day dry spells	pr	all	all	periods	custom	divide	{}	KADk-Helpers/indicators/dry_spells.py	fiveDayDrySpells
+i115	x	Number of 10-day dry spells	pr	all	all	periods	custom	divide	{}	KADk-Helpers/indicators/dry_spells.py	tenDayDrySpells
+i116	x	Number of snowfall days	pr,tas	all	all	periods	custom	subtract	{}	KADk-Helpers/indicators/snowfall_days.py	snowfallDays
+## Wind											
+i301	x	Annual mean wind speed	sfcWind	all	all	periods	mean	divide	{}		
+i302	x	Days with maximum wind speed above 25 m/s	sfcWindmax	all	all	periods	custom	subtract	{}	KADk-Helpers/indicators/wind_days.py	daysAbove25ms
+## Radiation											
+i401	x	Mean downward shortwave radiation at surface	rsds	all	all	periods	mean	divide	{}		
+i402	x	Mean potential evaporation	potevap	all	all	periods	mean	divide	{}		
+i403		Mean sunshine duration	shp	all	all	periods	mean	subtract	{}		
