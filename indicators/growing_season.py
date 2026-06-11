@@ -101,21 +101,21 @@ def generic_growing_season_end_annual(tas, threshold=5.0, window=6):
 
 # Workflow-funktioner med camelCase navngivning:
 
-def growingSeasonStart(tas):
+def growingSeasonStart(tas,**kwargs):
     annual_gss = generic_growing_season_start_annual(tas, threshold=5.0, window=6)
     out = annual_gss.where(annual_gss > 0).mean(dim="year")
     nan_mask = tas.isnull().any(dim="time")
     return out.where(~nan_mask)
 
 
-def growingSeasonEnd(tas):
+def growingSeasonEnd(tas,**kwargs):
     annual_gse = generic_growing_season_end_annual(tas, threshold=5.0, window=6)
     out = annual_gse.where(annual_gse > 0).mean(dim="year")
     nan_mask = tas.isnull().any(dim="time")
     return out.where(~nan_mask)
 
 
-def growingSeasonLength(tas):
+def growingSeasonLength(tas,**kwargs):
     # 1. Hent de årlige start- og slutdage
     annual_gss = generic_growing_season_start_annual(tas, threshold=5.0, window=6)
     annual_gse = generic_growing_season_end_annual(tas, threshold=5.0, window=6)

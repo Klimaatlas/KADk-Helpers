@@ -99,14 +99,14 @@ def count_precip_days(pr: xr.DataArray, threshold: float) -> xr.DataArray:
 
 
 # Convenience wrappers ---------------------
-def daysAbove10mm(pr: xr.DataArray) -> xr.DataArray:
+def daysAbove10mm(pr: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate heavy precipitation days using a 10 mm threshold.
     """
     return count_precip_days(pr, threshold=10.0)
 
 
-def daysAbove20mm(pr: xr.DataArray) -> xr.DataArray:
+def daysAbove20mm(pr: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate heavy precipitation days using a 20 mm threshold.
     """

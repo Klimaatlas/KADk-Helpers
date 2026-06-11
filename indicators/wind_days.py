@@ -100,7 +100,7 @@ def count_wind_days(sfcWindmax: xr.DataArray, threshold: float) -> xr.DataArray:
 
 
 # Convenience wrappers ---------------------
-def daysAbove25ms(sfcWindmax: xr.DataArray) -> xr.DataArray:
+def daysAbove25ms(sfcWindmax: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate wind days strictly exceeding a 25 m/s threshold.
     """

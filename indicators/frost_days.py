@@ -93,7 +93,7 @@ def count_frost_days(tasmin: xr.DataArray, threshold: float) -> xr.DataArray:
 
 
 # Convenience wrappers ---------------------
-def frostDays(tasmin: xr.DataArray) -> xr.DataArray:
+def frostDays(tasmin: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate frost days using a 0°C threshold.
     """

@@ -94,14 +94,14 @@ def count_maximum_precip(pr: xr.DataArray, period: int, target_day: int) -> xr.D
 
 
 # Convenience wrappers ---------------------
-def maximum5dayPrecip(pr: xr.DataArray) -> xr.DataArray:
+def maximum5dayPrecip(pr: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate the mean annual maximum 5-day accumulated precipitation (shifted to day 3).
     """
     return count_maximum_precip(pr, period=5, target_day=3)
 
 
-def maximum14dayPrecip(pr: xr.DataArray) -> xr.DataArray:
+def maximum14dayPrecip(pr: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate the mean annual maximum 14-day accumulated precipitation (shifted to day 7).
     """

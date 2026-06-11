@@ -167,7 +167,7 @@ def count_longest_dry_spell(pr: xr.DataArray, threshold: float) -> xr.DataArray:
 
 
 # Convenience wrappers ---------------------
-def longestDrySpell(pr: xr.DataArray) -> xr.DataArray:
+def longestDrySpell(pr: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate the mean annual longest dry spell strictly using a 1.0 mm threshold.
     """

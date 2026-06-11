@@ -105,7 +105,7 @@ def count_freeze_thaw_days(
 
 
 # Convenience wrappers ---------------------
-def freezeThawDays(tasmax: xr.DataArray, tasmin: xr.DataArray) -> xr.DataArray:
+def freezeThawDays(tasmax: xr.DataArray, tasmin: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate freeze-thaw days using a 0°C threshold.
     """

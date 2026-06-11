@@ -169,7 +169,7 @@ def count_growing_season_frost_days(
 
 
 # Convenience wrappers ---------------------
-def frostGrowingSeason(tas: xr.DataArray, tasmin: xr.DataArray) -> xr.DataArray:
+def frostGrowingSeason(tas: xr.DataArray, tasmin: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate the number of frost days (<0°C) from the growing season start until June 23rd.
     """

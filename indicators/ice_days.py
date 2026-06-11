@@ -93,7 +93,7 @@ def count_ice_days(tasmax: xr.DataArray, threshold: float) -> xr.DataArray:
 
 
 # Convenience wrappers ---------------------
-def iceDays(tasmax: xr.DataArray) -> xr.DataArray:
+def iceDays(tasmax: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate ice days using a 0°C threshold.
     """

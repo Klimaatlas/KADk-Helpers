@@ -174,14 +174,14 @@ def count_dry_spells(pr: xr.DataArray, threshold: float, min_duration: int) -> x
 
 
 # Convenience wrappers ---------------------
-def fiveDayDrySpells(pr: xr.DataArray) -> xr.DataArray:
+def fiveDayDrySpells(pr: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate the mean annual number of dry spells lasting at least 5 days (< 1.0 mm).
     """
     return count_dry_spells(pr, threshold=1.0, min_duration=5)
 
 
-def tenDayDrySpells(pr: xr.DataArray) -> xr.DataArray:
+def tenDayDrySpells(pr: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate the mean annual number of dry spells lasting at least 10 days (< 1.0 mm).
     """

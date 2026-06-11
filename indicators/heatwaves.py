@@ -83,14 +83,14 @@ def count_heatwave_days(tasmax: xr.DataArray, threshold: float) -> xr.DataArray:
 
 
 # Convenience wrappers ---------------------
-def heatwaveDays(tasmax: xr.DataArray) -> xr.DataArray:
+def heatwaveDays(tasmax: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate heatwave days using a 28°C threshold.
     """
     return count_heatwave_days(tasmax, threshold=28)
 
 
-def warmwaveDays(tasmax: xr.DataArray) -> xr.DataArray:
+def warmwaveDays(tasmax: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate warmwave days using a 25°C threshold.
     """

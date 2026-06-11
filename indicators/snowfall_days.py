@@ -120,7 +120,7 @@ def count_snowfall_days(pr: xr.DataArray, tas: xr.DataArray, threshold: float) -
 
 
 # Convenience wrappers ---------------------
-def snowfallDays(pr: xr.DataArray, tas: xr.DataArray) -> xr.DataArray:
+def snowfallDays(pr: xr.DataArray, tas: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate snowfall days strictly exceeding a 1.0 mm threshold.
     """

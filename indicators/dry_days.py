@@ -98,7 +98,7 @@ def count_dry_days(pr: xr.DataArray, threshold: float = 1.0) -> xr.DataArray:
 
 
 # Convenience wrappers ---------------------
-def dryDays(pr: xr.DataArray) -> xr.DataArray:
+def dryDays(pr: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate dry days strictly using a 1.0 mm threshold.
     """

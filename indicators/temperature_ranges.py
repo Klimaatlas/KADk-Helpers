@@ -45,7 +45,7 @@ def _assert_temperature_input(da: xr.DataArray, name: str):
         )
 
 # Generic public functions -----------------
-def annualTemperatureRange(tas: xr.DataArray) -> xr.DataArray:
+def annualTemperatureRange(tas: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate the annual temperature range, defined as the mean across all years
     of the difference between the absolute maximum and minimum temperature within each year.
@@ -66,7 +66,7 @@ def annualTemperatureRange(tas: xr.DataArray) -> xr.DataArray:
     nan_mask = tas.isnull().any(dim="time")
     return out.where(~nan_mask)
 
-def dailyTemperatureRange(tasmax: xr.DataArray, tasmin: xr.DataArray) -> xr.DataArray:
+def dailyTemperatureRange(tasmax: xr.DataArray, tasmin: xr.DataArray,**kwargs) -> xr.DataArray:
     """
     Calculate the daily temperature range, defined as the long-term mean
     difference between daily maximum and daily minimum temperature.
