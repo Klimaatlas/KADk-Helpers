@@ -31,7 +31,9 @@ patterns = [
     "*ICTP-RegCM4-6_v1*20051201-2005123?*",
     "*ICTP-RegCM4-6_v1*20051201-20060101*",
     # * NOAA model only has rcp26 run, but not historical. 
-    "*EUR-11_NOAA-GFDL-GFDL-ESM2G_rcp26_r1i1p1_GERICS-REMO2015_v1_day*"
+    "*EUR-11_NOAA-GFDL-GFDL-ESM2G_rcp26_r1i1p1_GERICS-REMO2015_v1_day*",
+    # * Duplicated rsds from MOHC that end on 30th Dec
+    "*rsds_EUR-11_MOHC-HadGEM2-ES_rcp85_r1i1p1_ICTP-RegCM4-6_v1_day_20*0101-2*1230.nc"
 ]
 
 # Remove files for IPSL WRF381P. The archive has files that cover both 5 year and 10 year time windows, that appear to be complete duplicates of each other. We remove all 10 year versions. But it requires a lot of manual work!
