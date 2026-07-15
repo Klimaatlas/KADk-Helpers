@@ -130,3 +130,36 @@ def growingSeasonLength(tas,**kwargs):
     # 4. Spatial maskering
     nan_mask = tas.isnull().any(dim="time")
     return out.where(~nan_mask)
+
+
+# Validation ---------------------------------------------------
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
+    # Setup the built in air temperature data in xarray as a test dataset.
+    # Only use the first year, convert to C
+    air_temp = xr.tutorial.load_dataset("air_temperature")
+    dat = air_temp.air.resample(time="D").mean()
+    dat = dat.isel(time=slice(0,365))
+    dat= xclim.core.units.convert_units_to(dat, "degC")
+
+    #Apply growing season functions
+    gs_start=growingSeasonStart(tas=dat)
+    gs_end=growingSeasonEnd(tas=dat)
+    gs_start.plot()
+    plt.title("Start of growing season")
+    plt.show()
+    gs_end.plot()
+    plt.title("End of growing season")
+    plt.show()
+
+    #Make comparison plots
+    these_coords={"lon":20,"lat":10}
+    start_doy=gs_start.isel(these_coords)
+    plt.axhline(y=5, color="red")
+    #plt.axvline(y=5, color="red")
+    dat.isel(these_coords).plot()
+    plt.xlim(start_doy-20,start_doy+20)
+
+
+
