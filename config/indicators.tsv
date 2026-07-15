@@ -1,4 +1,4 @@
-id	enabled	indicator_codes	description	variables	datasets	seasons	timeBinning	statistic	skipna	deltaType	additionalArgs	customScriptPath	customScriptFunction
+id	enabled	indicator_codes	description	variables	datasets	seasons	time_binning	statistic	skipna	delta_type	additional_arguments	custom_script	custom_function
 ## Temperature													
 i001	x		Annual mean temperature	tas	all	all	periods	mean	true	subtract	{}		
 i002	x		Daily max temperature	tasmax	all	all	periods	mean	true	subtract	{}		
@@ -36,4 +36,3 @@ i302	x		Days with maximum wind speed above 25 m/s	sfcWindmax	all	all	periods	cou
 ## Radiation													
 i401	x		Mean downward shortwave radiation at surface	rsds	all	all	periods	mean	true	divide	{}		
 i402	x		Mean potential evaporation	potevap	all	all	periods	mean	true	divide	{}		
-i403			Mean sunshine duration	shp	all	all	periods	mean	true	subtract	{}		
