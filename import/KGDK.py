@@ -1,11 +1,10 @@
 # Collection of functions to handle importing of differing data formats
-import KAPy
 from KAPy import helpers
 import xarray as xr
 from cdo import Cdo
 import xesmf as xe
 
-def import_KGDK(inFiles,varCode,internalVarName, checks,**kwargs):
+def import_KGDK(input_files,variable_code,internal_variable_name, checks,**kwargs):
     """
     Import KGDK data
 
@@ -19,7 +18,7 @@ def import_KGDK(inFiles,varCode,internalVarName, checks,**kwargs):
     ----------
     config : _type_
         Configuration object
-    inFiles : _type_
+    input_files : _type_
         List of files to import
     inpID : _type_
         ID of the configuration
@@ -33,12 +32,12 @@ def import_KGDK(inFiles,varCode,internalVarName, checks,**kwargs):
     
     """
     #Debugging setup
-    inFiles=["./inputs/tas_klimagrid_2023.nc"]
+    input_files=["./inputs/tas_klimagrid_2023.nc"]
     inpID="KGDK"
     """
     #Read input files into RAM
     time_coder=xr.coders.CFDatetimeCoder(use_cftime=True)
-    dsIn =xr.open_mfdataset(inFiles,
+    dsIn =xr.open_mfdataset(input_files,
                             combine='nested',
                             decode_times=time_coder,
                             join="override", 
@@ -46,15 +45,15 @@ def import_KGDK(inFiles,varCode,internalVarName, checks,**kwargs):
     dsIn=dsIn.compute()
 
     #Regrid 20km tas data onto 10km tasmax grid to allow calculation of e.g. skewness
-    if varCode=="tas":
-        refGrd=helpers.readFile("/dmidata/projects/klimaatlas/data/KGDK/tasmaxobs_2004-2019.nc")
+    if variable_code=="tas":
+        refGrd=helpers.read_file("/dmidata/projects/klimaatlas/data/KGDK/tasmaxobs_2004-2019.nc")
         regrdr=xe.Regridder(dsIn,refGrd,
                             method="nearest_s2d",
                             unmapped_to_nan=False)  
         dsIn=regrdr(dsIn,keep_attrs=True)
 
     # Select the desired variable and rename it
-    ds = dsIn.rename({internalVarName: varCode})
+    ds = dsIn.rename({internal_variable_name: variable_code})
 
     #Specify the coordinate system to be UTM. First add the crs information
     #Thanks to ChatGPT for help setting this up, particularly the coordinate definition
@@ -71,7 +70,7 @@ def import_KGDK(inFiles,varCode,internalVarName, checks,**kwargs):
 
     # Add the CRS variable with UTM Zone 32 projection attributes
     #ds["crs"] = xr.DataArray(0, attrs=crs_attrs)
-    #ds[thisInp["varCode"]].attrs['grid_mapping']="crs"   
+    #ds[thisInp["variable_code"]].attrs['grid_mapping']="crs"   
 
     #Set the CF dimension names correctly
     ds.y.attrs['axis']="Y"
@@ -82,12 +81,12 @@ def import_KGDK(inFiles,varCode,internalVarName, checks,**kwargs):
     ds.lon.attrs['units']="degrees_east"
     ds.lat.attrs['standard_name']="latitude"
     ds.lat.attrs['units']="degrees_north"
-    ds[varCode].attrs['coordinates'] = "lon lat"
+    ds[variable_code].attrs['coordinates'] = "lon lat"
 
     #Ensure consistent ordering
     ds=ds.transpose("time","y","x")
     
     ## Convert to dataarray
-    da = ds[varCode]  
+    da = ds[variable_code]  
 
     return(da)
