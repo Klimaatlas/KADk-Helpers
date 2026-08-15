@@ -8,6 +8,8 @@ for KAPy to the CORDEX6 archive.
 """
 
 from pathlib import Path
+from collections import defaultdict
+import fnmatch
 
 # Configuration
 ROOT = Path("/dmidata/projects/klimaatlas/data/CORDEX6/DAY_EUR11_FULL/")
@@ -23,26 +25,37 @@ variables = [
     "tasmin",
 ]
 
-
-def main():
-    for var in variables:
-        outfile = Path(f"CORDEX6-{var}")
-
-        pattern = f"{var}_*.nc"
-
-        SRCDIR = ROOT / var
-
-        files = sorted(
-            p
-            for p in SRCDIR.rglob(pattern)
-        )
-
-        with outfile.open("w") as f:
-            for file in files:
-                f.write(f"{file}\n")
-
-        print(f"{var}: {len(files)} files written to {outfile}")
+removal= ["*_ERA5_evaluation_*"]
 
 
-if __name__ == "__main__":
-    main()
+#Build an index of the entire collection
+index = defaultdict(list)
+
+for p in ROOT.rglob("*.nc"):
+    parts = p.stem.split("_")
+
+    var = parts[0]
+
+    index[(var)].append(p)
+
+for lst in index.values():
+    lst.sort()
+
+
+for var in variables:
+    outfile = Path(f"CORDEX6-{var}")
+
+    files = index[(var)]
+
+    # Apply removal patterns
+    files = [
+        str(f) for f in files
+        if not any(fnmatch.fnmatch(str(f), p) for p in removal)
+    ]
+
+    with outfile.open("w") as f:
+        for file in files:
+            f.write(f"{file}\n")
+
+    print(f"{var}: {len(files)} files written to {outfile}")
+
