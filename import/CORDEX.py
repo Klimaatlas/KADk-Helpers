@@ -10,10 +10,10 @@ import numpy as np
 import re
 import xarray as xr
 
-def import_CORDEX(inFiles,varCode,internalVarName, checks,cutoutArgs, **kwargs):
+def import_CORDEX(input_files,variable_code,internal_variable_name, checks,cutout_arguments, **kwargs):
     # Import --------------------------------------
     #Get list of filenames
-    inFnames=[os.path.basename(f) for f in inFiles]
+    inFnames=[os.path.basename(f) for f in input_files]
    
     # The sfcWind HadGEM2 / RegCM4 historical run has the supplementary coordinates labelled as "xlon" and "xlat",
     # which is a mistake - they should be "lon" and "lat". The problem is only in the historical runs though
@@ -23,7 +23,7 @@ def import_CORDEX(inFiles,varCode,internalVarName, checks,cutoutArgs, **kwargs):
         time_coder=xr.coders.CFDatetimeCoder(use_cftime=True)
         try:
             dsIn = xr.open_mfdataset(
-                inFiles,
+                input_files,
                 chunks={"time": 256},
                 combine="nested",
                 concat_dim="time",
@@ -35,14 +35,14 @@ def import_CORDEX(inFiles,varCode,internalVarName, checks,cutoutArgs, **kwargs):
                 data_vars=["sfcWind"])
             
         except Exception as e:
-            raise RuntimeError(f"Opening following NetCDF files:\n '{inFiles}'\n failed with error:\n{e}")	
+            raise RuntimeError(f"Opening following NetCDF files:\n '{input_files}'\n failed with error:\n{e}")	
         
         #Correct supplementary coordinates
         dsIn = dsIn.set_coords(["lat", "lon"])
         
         # Select the desired variable to give a and rename to the variable code
-        da = dsIn[internalVarName]
-        da.name= varCode
+        da = dsIn[internal_variable_name]
+        da.name= variable_code
 
         # Drop the m10 degenerate dimension. 
         # We drop time_bnds explicitly here - this mirrors what xarray would do anyway when working with
@@ -53,9 +53,9 @@ def import_CORDEX(inFiles,varCode,internalVarName, checks,cutoutArgs, **kwargs):
     
     else:
         #Import using the default import functionality
-        da=KAPy.defaultImport(inFiles=inFiles,
-                                varCode=varCode,
-                                internalVarName=internalVarName,
+        da=KAPy.defaultImport(input_files=input_files,
+                                variable_code=variable_code,
+                                internal_variable_name=internal_variable_name,
                                 checks=checks)
 
     #Post import modifications ------------
@@ -83,8 +83,8 @@ def import_CORDEX(inFiles,varCode,internalVarName, checks,cutoutArgs, **kwargs):
         da=da.sel(time=slice(None,"2100-01-01"))
 
     #Apply cutouts-----------------
-    if cutoutArgs["method"] == "lonlatbox":
-        da=KAPy.cutout_lonlat(da,**cutoutArgs,varCode=varCode)
+    if cutout_arguments["method"] == "lonlatbox":
+        da=KAPy.cutout_lonlat(da,**cutout_arguments,variable_code=variable_code)
 
     return(da)
 
