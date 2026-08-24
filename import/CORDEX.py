@@ -53,7 +53,7 @@ def import_CORDEX(input_files,variable_code,internal_variable_name, checks,cutou
     
     else:
         #Import using the default import functionality
-        da=KAPy.defaultImport(input_files=input_files,
+        da=KAPy.default_import(input_files=input_files,
                                 variable_code=variable_code,
                                 internal_variable_name=internal_variable_name,
                                 checks=checks)
