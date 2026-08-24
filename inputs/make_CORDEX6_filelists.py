@@ -25,8 +25,11 @@ variables = [
     "tasmin",
 ]
 
-removal= ["*_ERA5_evaluation_*"]
-
+# Exclude the following
+# * ERA5 evaluation runs
+# * RACMO SSP1-26 which has an issue with coordinate matching with historical
+exclude= ["*_ERA5_evaluation_*",
+          "*_EUR-12_MPI-ESM1-2-HR_ssp126_r1i1p1f1_KNMI_RACMO23E_v1-r1_day_*"]
 
 #Build an index of the entire collection
 index = defaultdict(list)
@@ -47,10 +50,10 @@ for var in variables:
 
     files = index[(var)]
 
-    # Apply removal patterns
+    # Apply exclusion patterns
     files = [
         str(f) for f in files
-        if not any(fnmatch.fnmatch(str(f), p) for p in removal)
+        if not any(fnmatch.fnmatch(str(f), p) for p in exclude)
     ]
 
     with outfile.open("w") as f:
